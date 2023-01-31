@@ -5,17 +5,35 @@ const axiosInstance = axios.create({
   baseURL: API_URL,
 });
 
-const request = (url, params, method) => {
+// Setting Up Deafults
+
+axiosInstance.defaults.headers = {
+  "Content-Type": "application/json",
+  Accept: "application/json",
+};
+
+const request = async (url, params, method) => {
   const onSuccess = (res) => {
-    console.log("Success Response", res);
+    console.log("Success Response", res.data);
 
     return res.data;
   };
-  const onError = (error) => {
-    console.log("Error Response", error.response ?? error);
+  const onError = (res) => {
+    console.log("Error Response", res.data);
 
-    return error.response ?? error;
+    return res.data;
   };
+
+  try {
+    const res = await axiosInstance.request({
+      url,
+      method,
+      params,
+    });
+    return onSuccess(res);
+  } catch (error) {
+    onError(error);
+  }
 
   axiosInstance
     .request({
@@ -27,17 +45,17 @@ const request = (url, params, method) => {
     .catch(onError);
 };
 
-const _get = (url, params) => {
-  return request(url, params, "get");
+const _get = async (url, params) => {
+  return await request(url, params, "get");
 };
-const _post = (url, params) => {
-  return request(url, params, "get");
+const _post = async (url, params) => {
+  return await request(url, params, "get");
 };
-const _put = (url, params) => {
-  return request(url, params, "get");
+const _put = async (url, params) => {
+  return await request(url, params, "get");
 };
-const _delete = (url, params) => {
-  return request(url, params, "get");
+const _delete = async (url, params) => {
+  return await request(url, params, "get");
 };
 
 const client = {
