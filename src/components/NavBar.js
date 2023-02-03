@@ -27,7 +27,7 @@ import AppRegistrationIcon from "@mui/icons-material/AppRegistration";
 import { useNavigate } from "react-router-dom";
 
 export default function Drawer() {
-  const [isLoggedIn, setisLoggedIn] = React.useState(false);
+  const isLoggedIn = false;
   const navBar = [
     [
       { title: "Home", route: "", icon: <HomeIcon />, isProtected: false },
@@ -78,27 +78,26 @@ export default function Drawer() {
           <React.Fragment key={`navbar-${navBarIdx + 1}`}>
             <List style={{ padding: 0 }}>
               {subNavBar.map((nav, navIdx) => {
-                if (isLoggedIn === nav.isProtected)
-                  return (
-                    <ListItem
-                      key={`nav-item-${navIdx}`}
-                      style={{
-                        paddingBottom: 2,
-                        paddingTop: 2,
-                        paddingLeft: 10,
-                        paddingRight: 10,
+                return isLoggedIn === nav.isProtected ? (
+                  <ListItem
+                    key={`nav-item-${navIdx}`}
+                    style={{
+                      paddingBottom: 2,
+                      paddingTop: 2,
+                      paddingLeft: 10,
+                      paddingRight: 10,
+                    }}
+                  >
+                    <ListItemButton
+                      onClick={() => {
+                        navigate(`/${nav.route}`);
                       }}
                     >
-                      <ListItemButton
-                        onClick={() => {
-                          navigate(`/${nav.route}`);
-                        }}
-                      >
-                        <ListItemIcon>{nav.icon}</ListItemIcon>
-                        <ListItemText>{nav.title}</ListItemText>
-                      </ListItemButton>
-                    </ListItem>
-                  );
+                      <ListItemIcon>{nav.icon}</ListItemIcon>
+                      <ListItemText>{nav.title}</ListItemText>
+                    </ListItemButton>
+                  </ListItem>
+                ) : null;
               })}
             </List>
             {navBarIdx + 1 < navBar.length ? <Divider /> : <></>}
