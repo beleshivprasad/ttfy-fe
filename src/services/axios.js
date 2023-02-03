@@ -12,7 +12,7 @@ axiosInstance.defaults.headers = {
   Accept: "application/json",
 };
 
-const request = async (url, params, method) => {
+const request = async (url, data, method) => {
   const onSuccess = (res) => {
     console.log("Success Response", res.data);
 
@@ -28,34 +28,25 @@ const request = async (url, params, method) => {
     const res = await axiosInstance.request({
       url,
       method,
-      params,
+      data,
     });
     return onSuccess(res);
   } catch (error) {
-    onError(error);
+    return onError(error);
   }
-
-  axiosInstance
-    .request({
-      url,
-      method,
-      params,
-    })
-    .then(onSuccess)
-    .catch(onError);
 };
 
-const _get = async (url, params) => {
-  return await request(url, params, "get");
+const _get = async (url, data) => {
+  return await request(url, data, "get");
 };
-const _post = async (url, params) => {
-  return await request(url, params, "get");
+const _post = async (url, data) => {
+  return await request(url, data, "post");
 };
-const _put = async (url, params) => {
-  return await request(url, params, "get");
+const _put = async (url, data) => {
+  return await request(url, data, "put");
 };
-const _delete = async (url, params) => {
-  return await request(url, params, "get");
+const _delete = async (url, data) => {
+  return await request(url, data, "delete");
 };
 
 const client = {
