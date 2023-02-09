@@ -1,25 +1,18 @@
-import React, { useState } from "react";
+import React, { useEffect } from "react";
 
-import {
-  Card,
-  Button,
-  CardActions,
-  Box,
-  Typography,
-  InputAdornment,
-} from "@mui/material";
+import { Card, Button, Box, Typography, InputAdornment } from "@mui/material";
 import TextField from "@mui/material/TextField";
 
 import Main from "../../layouts/Main";
 import Toast from "../../components/Toast";
-
-import client from "../../services/axios";
 
 import * as yup from "yup";
 import { useFormik } from "formik";
 import { useNavigate } from "react-router-dom";
 import { AccountCircle } from "@mui/icons-material";
 import KeyIcon from "@mui/icons-material/Key";
+import { useDispatch, useSelector } from "react-redux";
+import { loginUser } from "../../redux/actions/userActions";
 
 const validationSchema = yup.object({
   email: yup.string().email("Email is not valid").required("Email is required"),
@@ -31,44 +24,35 @@ const validationSchema = yup.object({
 
 const Login = () => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const user = useSelector((state) => state.user);
+  const flash = useSelector((state) => state.flash);
 
-  const [flashMessage, setFlashMessage] = useState("");
-  const [flashMessageType, setFlashMessageType] = useState("info");
-  const [showFlashMessage, setShowFlashMessage] = useState(false);
-  const [errors, setErrors] = useState([]);
-
-  function displayFlashMessage(msg, type, errors = []) {
-    const allowedFlashTypes = ["success", "info", "error", "warning"];
-    if (!allowedFlashTypes.includes(type))
-      throw new Error("Invalid flash message type, allowed", allowedFlashTypes);
-
-    setFlashMessage(msg);
-    setFlashMessageType(type);
-    setErrors(errors);
-    setShowFlashMessage(true);
-  }
+  useEffect(() => {
+    if (user.isLoggedIn) navigate("/");
+  }, [navigate, user.isLoggedIn]);
 
   const formik = useFormik({
     initialValues: { email: "", password: "" },
     validationSchema,
-    onSubmit: async (formData) => {
-      const res = await client.post("/user/login", formData);
-      if (res.success) {
-        displayFlashMessage(res.message, "success");
-      } else {
-        displayFlashMessage(res.message, "error", res.errors);
-      }
-    },
+    onSubmit: (user) => dispatch(loginUser(user)),
   });
 
   return (
-    <Main>
+    <Main
+      sx={{
+        position: "absolute",
+        top: "50%",
+        left: "50%",
+        transform: "translate(-50%, -50%)",
+      }}
+    >
       <Toast
-        showFlashMessage={showFlashMessage}
-        setShowFlashMessage={setShowFlashMessage}
-        flashMessageType={flashMessageType}
-        flashMessage={flashMessage}
-        errors={errors}
+        showMessage={flash.showMessage}
+        messageType={flash.messageType}
+        message={flash.message}
+        errors={flash.errors}
+        hideAfter={flash.hideAfter}
       />
       <Box
         sx={{
@@ -77,16 +61,26 @@ const Login = () => {
           justifyContent: "center",
         }}
       >
-        <Card sx={{ minWidth: "400px", width: "30%", padding: 3 }}>
+        <Card
+          sx={{
+            minWidth: "400px",
+            width: "30%",
+            padding: 3,
+            display: "flex",
+            flexDirection: "column",
+            gap: 3,
+          }}
+        >
           <Typography
             fontSize={"30px"}
             fontWeight={"semibold"}
-            marginBottom={4}
+            textAlign={"center"}
             color="primary"
+            marginBottom={4}
           >
             Login
           </Typography>
-          <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
+          <Box sx={{ display: "flex", flexDirection: "column", gap: 4 }}>
             <TextField
               fullWidth
               required
@@ -96,7 +90,7 @@ const Login = () => {
                 "We'll never share your password"
               }
               label="Email"
-              variant="standard"
+              variant="outlined"
               value={formik.values.email}
               onChange={formik.handleChange}
               error={formik.touched.email && Boolean(formik.errors.email)}
@@ -113,7 +107,7 @@ const Login = () => {
               required
               name="password"
               label="Password"
-              variant="standard"
+              variant="outlined"
               type={"password"}
               value={formik.values.password}
               onChange={formik.handleChange}
@@ -128,39 +122,46 @@ const Login = () => {
               }}
             />
           </Box>
-          <CardActions
-            sx={{
-              marginTop: 4,
-              display: "flex",
-              justifyContent: "space-between",
-              padding: 0,
-            }}
-          >
-            <Box
-              sx={{
-                display: "flex",
-                gap: 1,
-                justifyContent: "flex-start",
-                alignItems: "center",
-              }}
-            >
-              <Typography>New user?</Typography>
-              <Button
-                size="small"
-                variant="outlined"
-                onClick={() => navigate("/register")}
-              >
-                Register
-              </Button>
-            </Box>
+          <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
             <Button
+              fullWidth={true}
               onClick={formik.handleSubmit}
-              size="small"
-              variant="outlined"
+              size="large"
+              variant="contained"
             >
-              Login
+              Submit
             </Button>
-          </CardActions>
+            <Box sx={{ display: "flex", justifyContent: "space-between" }}>
+              <Button size="small" type="text">
+                Forgot password
+              </Button>
+              <Box
+                sx={{
+                  display: "flex",
+                  justifyContent: "flex-end",
+                  alignItems: "center",
+                }}
+              >
+                <Typography
+                  sx={{ margin: 0, padding: 0 }}
+                  color={"black"}
+                  fontSize={"13px"}
+                  component={Button}
+                >
+                  New User?
+                </Typography>
+
+                <Button
+                  sx={{ margin: 0, padding: 0 }}
+                  size="small"
+                  type="text"
+                  onClick={() => navigate("/register")}
+                >
+                  Sign Up
+                </Button>
+              </Box>
+            </Box>
+          </Box>
         </Card>
       </Box>
     </Main>

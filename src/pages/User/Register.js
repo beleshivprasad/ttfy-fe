@@ -1,97 +1,65 @@
-import React, { useState } from "react";
-import * as yup from "yup";
-import client from "../../services/axios";
-
-import { useFormik } from "formik";
+import React, { useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
+import { userRegisterValidationSchema } from "../../plugins/yup";
+import { useFormik } from "formik";
+import { registerUser } from "../../redux/actions/userActions";
 
-import {
-  Card,
-  Button,
-  CardActions,
-  Box,
-  Typography,
-  TextField,
-} from "@mui/material";
-
+import { Card, Button, Box, Typography, TextField } from "@mui/material";
 import Main from "../../layouts/Main";
 import Toast from "../../components/Toast";
 
-yup.addMethod(yup.string, "isSame", function (msg) {
-  return this.test("isSame", msg, function (value) {
-    const password = this.parent.password;
-    if (password) {
-      if (value) return password === value;
-      return false;
-    }
-    return true;
-  });
-});
-
-const validationSchema = yup.object({
-  first_name: yup.string().required("First name is required"),
-  last_name: yup.string().required("Last name is required"),
-  email: yup.string().email("Email is not valid").required("Email is required"),
-  password: yup
-    .string()
-    .min(4, "Weak Password")
-    .required("Password is required"),
-  confirmPassword: yup.string().isSame("Password doesn't match"),
-});
-
 const Register = () => {
+  // HooksuseFormik
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
-  const [showFlashMessage, setShowFlashMessage] = useState(false);
-  const [flashMessage, setFlashMessage] = useState("");
-  const [flashMessageType, setFlashMessageType] = useState("info");
-  const [errors, setErrors] = useState([]);
+  // Flash Message State
+  const flash = useSelector((state) => state.flash);
+  const user = useSelector((state) => state.user);
 
-  function displayFlashMessage(msg, type, errors = []) {
-    const allowedFlashTypes = ["success", "info", "error", "warning"];
-    if (!allowedFlashTypes.includes(type))
-      throw new Error("Invalid flash message type, allowed", allowedFlashTypes);
+  useEffect(() => {
+    if (user.isLoggedIn) navigate("/");
+  }, [navigate, user.isLoggedIn]);
 
-    setFlashMessage(msg);
-    setFlashMessageType(type);
-    setErrors(errors);
-    setShowFlashMessage(true);
+  const formikSubmitHandler = (user) => {
+    const requestData = {
+      first_name: user.firstName,
+      last_name: user.lastName,
+      email: user.email,
+      password: user.email,
+    };
 
-    setTimeout(() => {
-      setShowFlashMessage(false);
-      setFlashMessage("");
-      setFlashMessageType("info");
-      setErrors([]);
-    }, 4000);
-  }
+    dispatch(registerUser(requestData));
+  };
 
   const formik = useFormik({
     initialValues: {
-      first_name: "",
-      last_name: "",
+      firstName: "",
+      lastName: "",
       email: "",
       password: "",
       confirmPassword: "",
     },
-    validationSchema,
-    onSubmit: async (formData) => {
-      const res = await client.post("/user/register", formData);
-      if (res.success) {
-        displayFlashMessage(res.message, "success");
-      } else {
-        displayFlashMessage(res.message, "error", res.errors);
-      }
-    },
+    validationSchema: userRegisterValidationSchema,
+    onSubmit: formikSubmitHandler,
   });
 
   return (
-    <Main>
+    <Main
+      sx={{
+        position: "absolute",
+        top: "50%",
+        left: "50%",
+        transform: "translate(-50%, -50%)",
+      }}
+    >
       <Toast
-        showFlashMessage={showFlashMessage}
-        setShowFlashMessage={setShowFlashMessage}
-        errors={errors}
-        flashMessage={flashMessage}
-        flashMessageType={flashMessageType}
+        showMessage={flash.showMessage}
+        messageType={flash.messageType}
+        message={flash.message}
+        errors={flash.errors}
+        hideAfter={flash.hideAfter}
       />
       <Box
         sx={{
@@ -100,52 +68,56 @@ const Register = () => {
           justifyContent: "center",
         }}
       >
-        <Card sx={{ minWidth: "400px", width: "30%", padding: 3 }}>
+        <Card
+          sx={{
+            minWidth: "400px",
+            width: "30%",
+            padding: 3,
+            display: "flex",
+            flexDirection: "column",
+            gap: 2,
+          }}
+        >
           <Typography
             fontSize={"30px"}
             fontWeight={"semibold"}
-            marginBottom={2}
+            textAlign={"center"}
             color="primary"
+            marginBottom={3}
           >
-            Register
+            Sign Up
           </Typography>
           <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
             <TextField
               fullWidth
               required
-              name="first_name"
+              name="firstName"
               label="First Name"
-              variant="standard"
-              value={formik.values.first_name}
+              variant="outlined"
+              value={formik.values.firstName}
               onChange={formik.handleChange}
               error={
-                formik.touched.first_name && Boolean(formik.errors.first_name)
+                formik.touched.firstName && Boolean(formik.errors.firstName)
               }
-              helperText={formik.touched.first_name && formik.errors.first_name}
+              helperText={formik.touched.firstName && formik.errors.firstName}
             />
             <TextField
               fullWidth
               required
-              name="last_name"
+              name="lastName"
               label="Last Name"
-              variant="standard"
-              value={formik.values.last_name}
+              variant="outlined"
+              value={formik.values.lastName}
               onChange={formik.handleChange}
-              error={
-                formik.touched.last_name && Boolean(formik.errors.last_name)
-              }
-              helperText={formik.touched.last_name && formik.errors.last_name}
+              error={formik.touched.lastName && Boolean(formik.errors.lastName)}
+              helperText={formik.touched.lastName && formik.errors.lastName}
             />
             <TextField
               fullWidth
               required
               name="email"
-              helperText={
-                (formik.touched.email && formik.errors.email) ||
-                "We'll never share your password"
-              }
               label="Email"
-              variant="standard"
+              variant="outlined"
               value={formik.values.email}
               onChange={formik.handleChange}
               error={formik.touched.email && Boolean(formik.errors.email)}
@@ -155,7 +127,7 @@ const Register = () => {
               required
               name="password"
               label="Password"
-              variant="standard"
+              variant="outlined"
               type={"password"}
               value={formik.values.password}
               onChange={formik.handleChange}
@@ -167,7 +139,7 @@ const Register = () => {
               required
               name="confirmPassword"
               label="Confirm Password"
-              variant="standard"
+              variant="outlined"
               type={"password"}
               value={formik.values.confirmPassword}
               onChange={formik.handleChange}
@@ -180,39 +152,40 @@ const Register = () => {
               }
             />
           </Box>
-          <CardActions
-            sx={{
-              marginTop: 4,
-              display: "flex",
-              justifyContent: "space-between",
-              padding: 0,
-            }}
-          >
+          <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
+            <Button
+              fullWidth={true}
+              onClick={formik.handleSubmit}
+              size="large"
+              variant="contained"
+            >
+              Submit
+            </Button>
             <Box
               sx={{
                 display: "flex",
-                gap: 1,
-                justifyContent: "flex-start",
-                alignItems: "center",
+                justifyContent: "flex-end",
               }}
             >
-              <Typography>Already registered?</Typography>
+              <Typography
+                sx={{ margin: 0, padding: 0 }}
+                color={"black"}
+                fontSize={"13px"}
+                component={Button}
+              >
+                Already have account?
+              </Typography>
+
               <Button
+                sx={{ margin: 0, padding: 0 }}
                 size="small"
-                variant="outlined"
+                type="text"
                 onClick={() => navigate("/login")}
               >
                 Login
               </Button>
             </Box>
-            <Button
-              onClick={formik.handleSubmit}
-              size="small"
-              variant="outlined"
-            >
-              Register
-            </Button>
-          </CardActions>
+          </Box>
         </Card>
       </Box>
     </Main>

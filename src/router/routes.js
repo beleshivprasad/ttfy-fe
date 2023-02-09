@@ -13,10 +13,6 @@ const routes = [
   },
   {
     path: "/dashboard",
-    loader: async () => {
-      for (let i = 0; i < 1000000000; i++) {}
-      return true;
-    },
     element: <Dashboard />,
   },
   {
