@@ -1,7 +1,7 @@
 import { all, call, put } from "redux-saga/effects";
 import { userLoginRequest, userRegisterRequest } from "../requestHandlers/user";
-import { saveAccessToken } from "../../actions/userActions";
-import { showFlashMessage } from "../../actions/flashActions";
+import { saveAccessToken, removeAccessToken } from "../../actions/userActions";
+import { showFlashMessage, hideFlashMessage } from "../../actions/flashActions";
 
 export function* loginWorkerSaga(action) {
   const { user } = action;
@@ -18,6 +18,10 @@ export function* loginWorkerSaga(action) {
       })
     );
   }
+}
+
+export function* logoutWorkerSaga() {
+  yield all([put(removeAccessToken()), put(hideFlashMessage())]);
 }
 
 export function* registerWorkerSaga(action) {
