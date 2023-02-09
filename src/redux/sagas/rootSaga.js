@@ -1,7 +1,10 @@
 import { all, takeEvery } from "redux-saga/effects";
 import { REGISTER_UESR, LOGIN_USER, LOGOUT_USER } from "../actions/actionTypes";
-import { loginWorkerSaga, registerWorkerSaga } from "./workerSaga/user";
-import { logoutWorkerSaga } from "./workerSaga/flash";
+import {
+  loginWorkerSaga,
+  logoutWorkerSaga,
+  registerWorkerSaga,
+} from "./workerSaga/user";
 
 function* watcherSaga() {
   yield all([
