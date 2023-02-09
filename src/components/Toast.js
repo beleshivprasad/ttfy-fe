@@ -1,39 +1,38 @@
 import React from "react";
 import { Alert, Snackbar } from "@mui/material";
 import { sentenceCase } from "../helpers/string";
+import { useDispatch } from "react-redux";
+import { hideFlashMessage } from "../redux/actions/flashActions";
 
 function FormError(props) {
-  const {
-    flashMessageType,
-    flashMessage,
-    showFlashMessage,
-    setShowFlashMessage,
-    errors,
-  } = props;
+  const { messageType, message, showMessage, errors, hideAfter } = props;
+  const dispatch = useDispatch();
 
   const getErrorMessage = () => {
     if (errors) {
       if (Array.isArray(errors)) {
         if (errors.length) return errors[0].msg;
-        return flashMessage;
+        return message;
       }
       return errors;
     }
-    return flashMessage;
+    return message;
   };
 
   return (
     <React.Fragment>
-      <Snackbar
-        open={showFlashMessage}
-        anchorOrigin={{ vertical: "top", horizontal: "center" }}
-        onClose={() => setShowFlashMessage(false)}
-        autoHideDuration={4000}
-      >
-        <Alert severity={flashMessageType || "info"}>
-          {sentenceCase(getErrorMessage())}
-        </Alert>
-      </Snackbar>
+      {showMessage ? (
+        <Snackbar
+          open={showMessage}
+          anchorOrigin={{ vertical: "top", horizontal: "center" }}
+          onClose={() => dispatch(hideFlashMessage())}
+          autoHideDuration={hideAfter || 3000}
+        >
+          <Alert severity={messageType || "info"}>
+            {sentenceCase(getErrorMessage())}
+          </Alert>
+        </Snackbar>
+      ) : null}
     </React.Fragment>
   );
 }

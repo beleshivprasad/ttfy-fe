@@ -1,8 +1,9 @@
-import { Box } from "@mui/material";
 import { useEffect, useState } from "react";
+import client from "../../plugins/axios";
+
+import { Box } from "@mui/material";
 import CTable from "../../components/custom/CTable";
 import Main from "../../layouts/Main";
-import client from "../../services/axios";
 
 function UserList() {
   const [users, setUsers] = useState([]);
